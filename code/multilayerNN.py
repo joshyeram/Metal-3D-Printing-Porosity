@@ -68,7 +68,7 @@ def main():
     y = np.array([[0], [1], [1], [0]])
 
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
-    nn = NeuralNetwork(2,1,4,4,.1, False, 'weights30000.csv')
+    nn = NeuralNetwork(2,1,4,7,.1, False, 'weights30000.csv')
 
     for i in range(30000):
         state = random.randint(0, 4)
