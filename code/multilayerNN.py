@@ -31,13 +31,7 @@ class NeuralNetwork:
         guess = sigmoid(np.dot(layer2, self.weights3))
 
         cost = output - guess
-        #a = np.dot(layer1.T, (2 * cost * sigmoid_derivative(self.guess)))
-        #np.dot(input.T, (np.dot(a, self.weights2.T) * sigmoid_derivative(layer1)))
-
-        #np.dot(layer1.T, (2 * (output - self.guess) * sigmoid_derivative(self.guess)))
-        #np.dot(input.T, (np.dot(2 * (output - self.guess) * sigmoid_derivative(self.guess), self.weights2.T) * sigmoid_derivative(layer1)))
-
-
+    
         firstChain = 2 * cost * sigmoid_derivative(guess)
         d_weights3 = np.dot(layer2.T, firstChain)
 
