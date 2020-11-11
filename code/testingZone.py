@@ -17,12 +17,8 @@ def mult(x,y):
 
 
 def main():
-    input = np.random.rand(1, 5)
-    guess = np.random.rand(5, 2)
-    print(input)
-    print(guess)
-    print()
-    print(np.dot(input,guess))
+
+    print(np.array([[1,2]]))
 
 def dataInput():
     with open("/Users/joshchung/Desktop/testCases/90bad10.csv", newline='') as csvfile:

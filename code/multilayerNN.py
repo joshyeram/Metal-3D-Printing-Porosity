@@ -10,7 +10,6 @@ def sigmoid(x):
 def sigmoid_derivative(x):
     return x * (1.0 - x)
 
-
 class NeuralNetwork:
     def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
         self.weights1 = np.random.rand(inputSize, hiddenSize1)
@@ -31,7 +30,7 @@ class NeuralNetwork:
         guess = sigmoid(np.dot(layer2, self.weights3))
 
         cost = output - guess
-    
+
         firstChain = 2 * cost * sigmoid_derivative(guess)
         d_weights3 = np.dot(layer2.T, firstChain)
 
@@ -62,10 +61,10 @@ def main():
     y = np.array([[0], [1], [1], [0]])
 
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
-    nn = NeuralNetwork(2,1,4,7,.1, False, 'weights30000.csv')
+    nn = NeuralNetwork(2,1,6,7,.1, False, 'weights30000.csv')
 
-    for i in range(30000):
-        state = random.randint(0, 4)
+    """
+    state = random.randint(0, 4)
         if (state == 0):
             trainingSet = np.array([X[0]])
             out = np.array([y[0]])
@@ -80,10 +79,23 @@ def main():
             out = np.array([y[3]])
 
         nn.train(trainingSet, out)
+    """
+    for i in range(30000):
+        x = random.randint(0, 2)
+        y = random.randint(0, 2)
+        if (x==y):
+            nn.train(np.array([[x,y]]), np.array([[1]]))
+        else:
+            nn.train(np.array([[x, y]]), np.array([[0]]))
 
-    for i in range(4):
-        print(nn.test(X[i]))
 
+
+    for i in range(20):
+        x = random.randint(0, 2)
+        y = random.randint(0, 2)
+        print(x,y)
+        print(nn.test(np.array([[x, y]])))
+        print()
 
 if __name__ == "__main__":
     main()
