@@ -23,6 +23,38 @@ class NeuralNetwork:
         self.count = 0
         self.weightFile = weightFile
 
+        if (state == True):
+            self.save()
+        else:
+            self.load(self.weightFile)
+
+    def save(self):
+        prevCount = int(self.weightFile[self.weightFile.find("weights")+7: self.weightFile.find(".csv")])
+        with open(self.weightFile[:self.weightFile.find("weights")+7] + str(self.count + prevCount) + '.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            for i in range(self.weights1.shape[0]):
+                writer.writerow(self.weights1[i])
+            for i in range(self.weights2.shape[0]):
+                writer.writerow(self.weights2[i])
+            for i in range(self.weights3.shape[0]):
+                writer.writerow(self.weights3[i])
+
+    def load(self, name):
+        with open(name, newline='') as csvfile:
+            data_list = list(csv.reader(csvfile))
+        self.weights1 = np.zeros((self.inputSize, self.hiddenSize1))
+        self.weights2 = np.zeros((self.hiddenSize1, self.hiddenSize2))
+        self.weights3 = np.zeros((self.hiddenSize2, self.outputSize))
+        for i in range(self.inputSize):
+            for j in range(self.hiddenSize1):
+                self.weights1[i][j] = float(data_list[i][j])
+        for i in range(self.hiddenSize1):
+            for j in range(self.hiddenSize2):
+                self.weights2[i][j] = float(data_list[i + self.inputSize][j])
+        for i in range(self.hiddenSize2):
+            for j in range(self.outputSize):
+                self.weights3[i][j] = float(data_list[i + self.inputSize + self.hiddenSize1][j])
+
     #input -(w1)> layer1 -(w2)> layer2 -(w3)> output
     def train(self, input, output):
         layer1 = sigmoid(np.dot(input, self.weights1))
@@ -52,6 +84,22 @@ class NeuralNetwork:
         guess = sigmoid(np.dot(layer2, self.weights3))
         return guess
 
+    def dataInputCompact(self, name):
+        with open(name, newline='') as csvfile:
+            data_list = list(csv.reader(csvfile))
+            arr = np.array(data_list).astype(np.float).flatten()
+            high = np.amax(arr)
+            low = np.amin(arr)
+            arr -= low
+            arr /= (high-low)
+        return arr
+
+    def dataOutput(self,name):
+        if(name.find("bad")!=-1):
+            return np.array([1])
+        else:
+            return np.array([0])
+
 def main():
     print("here")
     X = np.array([[0, 0],
@@ -61,24 +109,8 @@ def main():
     y = np.array([[0], [1], [1], [0]])
 
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
-    nn = NeuralNetwork(2,1,6,7,.1, False, 'weights30000.csv')
+    nn = NeuralNetwork(2,1,6,7,.1, False, 'testingweights30000.csv')
 
-    """
-    state = random.randint(0, 4)
-        if (state == 0):
-            trainingSet = np.array([X[0]])
-            out = np.array([y[0]])
-        elif (state == 1):
-            trainingSet = np.array([X[1]])
-            out = np.array([y[1]])
-        elif (state == 2):
-            trainingSet = np.array([X[2]])
-            out = np.array([y[2]])
-        else:
-            trainingSet = np.array([X[3]])
-            out = np.array([y[3]])
-
-        nn.train(trainingSet, out)
     """
     for i in range(30000):
         x = random.randint(0, 2)
@@ -88,7 +120,8 @@ def main():
         else:
             nn.train(np.array([[x, y]]), np.array([[0]]))
 
-
+    nn.save()
+    """
 
     for i in range(20):
         x = random.randint(0, 2)
