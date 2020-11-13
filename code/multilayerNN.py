@@ -30,7 +30,9 @@ class NeuralNetwork:
 
     def save(self):
         prevCount = int(self.weightFile[self.weightFile.find("weights")+7: self.weightFile.find(".csv")])
-        with open(self.weightFile[:self.weightFile.find("weights")+7] + str(self.count + prevCount) + '.csv', 'w', newline='') as file:
+        name = self.weightFile[:self.weightFile.find("weights")+7] + str(self.count + prevCount) + '.csv'
+
+        with open(name, 'w', newline='') as file:
             writer = csv.writer(file)
             for i in range(self.weights1.shape[0]):
                 writer.writerow(self.weights1[i])
@@ -92,7 +94,7 @@ class NeuralNetwork:
             low = np.amin(arr)
             arr -= low
             arr /= (high-low)
-        return arr
+        return np.array([arr])
 
     def dataOutput(self,name):
         if(name.find("bad")!=-1):
@@ -100,16 +102,67 @@ class NeuralNetwork:
         else:
             return np.array([0])
 
+    def crossVal(self):
+        path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/CrossValidationData.csv"
+        with open(path, 'a', newline='') as file:
+            writer = csv.writer(file)
+            prevCount = int(self.weightFile[self.weightFile.find("weights") + 7: self.weightFile.find(".csv")])
+            #writer.writerow([str(prevCount + self.count)])
+            for groupSkip in range(1, 11):
+                for groupTrain in range(1, 11):
+                    if (groupSkip == groupTrain):
+                        continue
+                    fname = glob.glob("/Users/joshchung/Desktop/crossVal/group" + str(groupTrain) + "/*.csv")
+                    while (len(fname) != 0):
+                        index = random.randint(0,len(fname))
+                        dir = fname[index]
+                        self.train(self.dataInputCompact(dir),self.dataOutput(dir))
+                        fname.pop(index)
+                check = glob.glob("/Users/joshchung/Desktop/crossVal/group" + str(groupSkip) + "/*.csv")
+                badcount = 0
+                badcountcorrect = 0
+                goodcount = 0
+                goodcountcorrect = 0
+                for item in check:
+                    if (item.find("bad")!=-1):
+                        if (self.test(self.dataInputCompact(item)) > .7):
+                            badcountcorrect += 1
+                        badcount += 1
+                    else:
+                        if (self.test(self.dataInputCompact(item)) < .2):
+                            goodcountcorrect += 1
+                        goodcount += 1
+                """
+                col = "Test group: " + str(groupSkip)
+                col1 = "Total correct:" + str(badcountcorrect + goodcountcorrect) + "/" + str(badcount + goodcount)
+                col2 = "Bad correct: " + str(badcountcorrect) + "/" + str(badcount)
+                col3 = "Good correct: " + str(goodcountcorrect) + "/" + str(goodcount)
+                """
+                thisRow = [str(prevCount + self.count),"Test group:" + str(groupSkip), "Total correct:", str(badcountcorrect + goodcountcorrect) + "/" + str(badcount + goodcount), "Bad correct:", str(badcountcorrect) + "/" + str(badcount), "Good correct:", str(goodcountcorrect) + "/" + str(goodcount)]
+                writer.writerow(thisRow)
+
 def main():
     print("here")
-    X = np.array([[0, 0],
-                  [0, 1],
-                  [1, 0],
-                  [1, 1]])
-    y = np.array([[0], [1], [1], [0]])
 
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
-    nn = NeuralNetwork(2,1,6,7,.1, False, 'testingweights30000.csv')
+    path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
+    #nn = NeuralNetwork(2,1,6,7,.05, False, path+'testingweights30000.csv')
+    nn2 = NeuralNetwork(900,1,20,16,.1, False, path+'weights0.csv')
+
+    for i in range(20):
+        print(i)
+        nn2.crossVal()
+    
+    #nn2.save()
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
 
     """
     for i in range(30000):
@@ -119,16 +172,11 @@ def main():
             nn.train(np.array([[x,y]]), np.array([[1]]))
         else:
             nn.train(np.array([[x, y]]), np.array([[0]]))
-
     nn.save()
-    """
-
     for i in range(20):
         x = random.randint(0, 2)
         y = random.randint(0, 2)
         print(x,y)
         print(nn.test(np.array([[x, y]])))
         print()
-
-if __name__ == "__main__":
-    main()
+    """

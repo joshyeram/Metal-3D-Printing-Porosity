@@ -17,8 +17,16 @@ def mult(x,y):
 
 
 def main():
+    name = "/Users/joshchung/Desktop/crossVal/group1/90bad1.csv"
+    with open(name, newline='') as csvfile:
+        data_list = list(csv.reader(csvfile))
+        arr = np.array(data_list).astype(np.float).flatten()
+        high = np.amax(arr)
+        low = np.amin(arr)
+        arr -= low
+        arr /= (high - low)
+    print( arr)
 
-    print(np.array([[1,2]]))
 
 def dataInput():
     with open("/Users/joshchung/Desktop/testCases/90bad10.csv", newline='') as csvfile:
