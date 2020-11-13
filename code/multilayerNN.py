@@ -15,6 +15,9 @@ class NeuralNetwork:
         self.weights1 = np.random.rand(inputSize, hiddenSize1)
         self.weights2 = np.random.rand(hiddenSize1, hiddenSize2)
         self.weights3 = np.random.rand(hiddenSize2, outputSize)
+        self.randomize(self.weights1)
+        self.randomize(self.weights2)
+        self.randomize(self.weights3)
         self.inputSize = inputSize
         self.outputSize = outputSize
         self.hiddenSize1 = hiddenSize1
@@ -40,6 +43,13 @@ class NeuralNetwork:
                 writer.writerow(self.weights2[i])
             for i in range(self.weights3.shape[0]):
                 writer.writerow(self.weights3[i])
+
+    def randomize(self, set):
+        for i in range(len(set)):
+            for j in range(len(set[0])):
+                if (random.randint(0, 2) == 0):
+                    set[i][j] *= -1
+
 
     def load(self, name):
         with open(name, newline='') as csvfile:
@@ -138,8 +148,33 @@ class NeuralNetwork:
                 col2 = "Bad correct: " + str(badcountcorrect) + "/" + str(badcount)
                 col3 = "Good correct: " + str(goodcountcorrect) + "/" + str(goodcount)
                 """
-                thisRow = [str(prevCount + self.count),"Test group:" + str(groupSkip), "Total correct:", str(badcountcorrect + goodcountcorrect) + "/" + str(badcount + goodcount), "Bad correct:", str(badcountcorrect) + "/" + str(badcount), "Good correct:", str(goodcountcorrect) + "/" + str(goodcount)]
+                thisRow = [str(prevCount + self.count),"Test group:" + str(groupSkip), "Total correct:", str((badcountcorrect + goodcountcorrect)/(badcount + goodcount)), "Bad correct:", str(badcountcorrect) + "/" + str(badcount), "Good correct:", str(goodcountcorrect) + "/" + str(goodcount)]
                 writer.writerow(thisRow)
+
+    def testCases(self):
+        fname = glob.glob("/Users/joshchung/Desktop/testCases/*.csv")
+        g = 0
+        b = 0
+        gc = 0
+        bc = 0
+        for item in fname:
+            guess = self.test(self.dataInputCompact(item))
+
+            if (item.find("bad") != -1):
+                b += 1
+                if (guess > .8):
+                    bc += 1
+                else:
+                    print(item[35:], guess)
+            else:
+                g += 1
+                if (guess < .2):
+                    gc += 1
+                else:
+                    print(item[35:], guess)
+
+        print("Bad" + str(bc) + "/" + str(b))
+        print("good" + str(gc) + "/" + str(g))
 
 def main():
     print("here")
@@ -147,12 +182,13 @@ def main():
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
     #nn = NeuralNetwork(2,1,6,7,.05, False, path+'testingweights30000.csv')
-    nn2 = NeuralNetwork(900,1,20,16,.1, False, path+'weights0.csv')
-
-    for i in range(20):
+    nn2 = NeuralNetwork(900,1,50,16,.005, False, path+'weights2770200.csv')
+    nn2.testCases()
+    """
+    for i in range(100):
         print(i)
         nn2.crossVal()
-    
+    """
     #nn2.save()
 
 
