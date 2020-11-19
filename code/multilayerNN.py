@@ -162,13 +162,13 @@ class NeuralNetwork:
 
             if (item.find("bad") != -1):
                 b += 1
-                if (guess > .8):
+                if (guess > .15):
                     bc += 1
                 else:
                     print(item[35:], guess)
             else:
                 g += 1
-                if (guess < .2):
+                if (guess < .15):
                     gc += 1
                 else:
                     print(item[35:], guess)

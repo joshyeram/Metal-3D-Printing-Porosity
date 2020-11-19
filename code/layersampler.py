@@ -6,53 +6,41 @@ import math
 
 value = 1
 globalG = 300
-rows, cols = (30, 30)
-
-
-center = (478, 248)
-sample = [[0]* cols for i in range(rows)]
+rows, cols = (40, 40)
 
 def main():
     path = "/Users/joshchung/Desktop/converted/*.csv"
+    count = 0
     for fname in glob.glob(path):
-
+        print(count)
+        count +=1
         with open(fname, newline='') as csvfile:
             point = fname.find("ed/") + 3
-            # print(fname[point:])
             name = fname[point:]
-            reader = csv.reader(csvfile)
             data_list = list(csv.reader(csvfile))
             x = int(data_list[0][1])
             y = int(data_list[1][1])
-            threshold = 0
-
-            mean = 0
-            data = [[0]* x for i in range(y)]
+            convert = np.zeros((y,x))
+            final = np.zeros((rows, cols))
             highest = np.array([0,0,0])
-            for j in range(0, y):
-                for i in range(0, x):
-                    mean += int(data_list[j+3][i])
-                    data[j][i] = int(data_list[j+3][i])
-                    if data[j][i] > float(highest[0]):
-                        highest[0] = int(data_list[j+3][i])
-                        highest[1] = j
-                        highest[2] = i
-            print(highest)
-            #mean /= y * x
-            #threshold = int(topPercent(data_list, .008, x, y))
-            indexX = int(highest[2] - cols / 2)
+            for i in range(0, y):
+                for j in range(0, x):
+                    #print(i+3,j)
+                    convert[i][j] = float(data_list[i+3][j])
+                    if convert[i][j] > float(highest[0]):
+                        highest[0] = int(data_list[i+3][j])
+                        highest[1] = i
+                        highest[2] = j
             indexY = int(highest[1] - rows / 2)
+            indexX = int(highest[2] - cols / 2)
             for i in range(rows):    # for every col:
                 for j in range(cols):    # For every row
-                    sample[i][j] = data[i+indexY][j+indexX]
-            #draw(cols,rows,threshold,highest)
-        with open('/Users/joshchung/Desktop/temp/Sampled2_'+name, 'w', newline='') as file:
+                    final[i][j] = convert[i+indexY][j+indexX]
+        with open('/Users/joshchung/Desktop/Sampled/Sampled_'+name, 'w', newline='') as file:
             writer = csv.writer(file)
-            temp = [0] * cols
             for i in range(rows):    # for every col:
-                for j in range(cols):
-                    temp[j] = sample[i][j]
-                writer.writerow(temp)
+                writer.writerow(final[i])
+
         
 def rgb(minimum, maximum, value):
     minimum, maximum = float(minimum), float(maximum)

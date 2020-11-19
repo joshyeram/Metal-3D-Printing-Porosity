@@ -3,16 +3,20 @@ from PIL import Image
 import numpy as np
 
 def main():
-    img = Image.new('RGB', (30, 30), "black")  # create a new black image
+    img = Image.new('RGB', (40, 40), "black")  # create a new black image
     pixel = img.load()
-    with open('/Users/joshchung/Desktop/testCases/180bad61.csv', newline='') as csvfile:
+    with open('/Users/joshchung/Desktop/Sampled/Sampled2_t404p6_x0_y25p17_z26p52_layer53.csv', newline='') as csvfile:
         reader = csv.reader(csvfile)
         data_list = list(csv.reader(csvfile))
-        data = np.zeros((30,30))
-        for i in range(30):
-            for j in range(30):
+        x = len(data_list)
+        data = np.zeros((x,x))
+        for i in range(x):
+            for j in range(x):
                 data[i][j] =  float(data_list[i][j])
-                pixel[j,i] = (red(1550,1850,data[i][j]),green(1550,1850,data[i][j]),blue(1550,1850,data[i][j]))
+                print(data[i][j])
+                if(data[i][j] >=1630 and data[i][j] <=1640):
+                    #pixel[j,i] = (red(1550,1850,data[i][j]),green(1550,1850,data[i][j]),blue(1550,1850,data[i][j]))
+                    pixel[j, i] = (255,255,255)
     img.show()
 
 def red(min,max,val):
