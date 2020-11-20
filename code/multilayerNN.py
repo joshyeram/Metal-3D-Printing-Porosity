@@ -106,6 +106,17 @@ class NeuralNetwork:
             arr /= (high-low)
         return np.array([arr])
 
+    def dataInputOutline(self, name):
+        with open(name, newline='') as csvfile:
+            data_list = list(csv.reader(csvfile))
+            arr = np.array(data_list).astype(np.float).flatten()
+            for i in range(len(arr)):
+                if(arr[i]>=1630 and arr[i]<=1640):
+                    arr[i] = 1
+                else:
+                    arr[i] = 0
+        return np.array([arr])
+
     def dataOutput(self,name):
         if(name.find("bad")!=-1):
             return np.array([1])
@@ -122,24 +133,24 @@ class NeuralNetwork:
                 for groupTrain in range(1, 11):
                     if (groupSkip == groupTrain):
                         continue
-                    fname = glob.glob("/Users/joshchung/Desktop/crossVal/group" + str(groupTrain) + "/*.csv")
+                    fname = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupTrain) + "/*.csv")
                     while (len(fname) != 0):
                         index = random.randint(0,len(fname))
                         dir = fname[index]
-                        self.train(self.dataInputCompact(dir),self.dataOutput(dir))
+                        self.train(self.dataInputOutline(dir),self.dataOutput(dir))
                         fname.pop(index)
-                check = glob.glob("/Users/joshchung/Desktop/crossVal/group" + str(groupSkip) + "/*.csv")
+                check = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupSkip) + "/*.csv")
                 badcount = 0
                 badcountcorrect = 0
                 goodcount = 0
                 goodcountcorrect = 0
                 for item in check:
                     if (item.find("bad")!=-1):
-                        if (self.test(self.dataInputCompact(item)) > .7):
+                        if (self.test(self.dataInputOutline(item)) > .7):
                             badcountcorrect += 1
                         badcount += 1
                     else:
-                        if (self.test(self.dataInputCompact(item)) < .2):
+                        if (self.test(self.dataInputOutline(item)) < .2):
                             goodcountcorrect += 1
                         goodcount += 1
                 """
@@ -152,26 +163,26 @@ class NeuralNetwork:
                 writer.writerow(thisRow)
 
     def testCases(self):
-        fname = glob.glob("/Users/joshchung/Desktop/testCases/*.csv")
+        fname = glob.glob("/Users/joshchung/Desktop/4040testCases/*.csv")
         g = 0
         b = 0
         gc = 0
         bc = 0
         for item in fname:
-            guess = self.test(self.dataInputCompact(item))
+            guess = self.test(self.dataInputOutline(item))
 
             if (item.find("bad") != -1):
                 b += 1
                 if (guess > .15):
                     bc += 1
                 else:
-                    print(item[35:], guess)
+                    print(item[39:], guess)
             else:
                 g += 1
                 if (guess < .15):
                     gc += 1
                 else:
-                    print(item[35:], guess)
+                    print(item[39:], guess)
 
         print("Bad" + str(bc) + "/" + str(b))
         print("good" + str(gc) + "/" + str(g))
@@ -181,15 +192,15 @@ def main():
 
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
-    #nn = NeuralNetwork(2,1,6,7,.05, False, path+'testingweights30000.csv')
-    nn2 = NeuralNetwork(900,1,50,16,.005, False, path+'weights2770200.csv')
-    nn2.testCases()
-    """
-    for i in range(100):
+    nnOutline = NeuralNetwork(1600,1,75,16,.01, False, path+'outlineweights608400.csv')
+    #nn2 = NeuralNetwork(900,1,50,16,.005, False, path+'weights2770200.csv')
+    #nn2.testCases()
+    nnOutline.testCases()
+
+    for i in range(0):
         print(i)
-        nn2.crossVal()
-    """
-    #nn2.save()
+        nnOutline.crossVal()
+    #nnOutline.save()
 
 
 if __name__ == "__main__":
