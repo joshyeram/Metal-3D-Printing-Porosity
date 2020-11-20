@@ -3,14 +3,11 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 def dataInput(name):
-    data = np.zeros((30,30), dtype=np.float128)
-    count = 0
-    high = 0
-    low = 1500
+    data = np.zeros((40,40), dtype=np.float128)
     with open(name, newline='') as csvfile:
         data_list = list(csv.reader(csvfile))
-        for i in range(30):
-            for j in range(30):
+        for i in range(40):
+            for j in range(40):
                 data[i][j] = float(data_list[i][j])
     set = np.array(data)
     return set
@@ -47,6 +44,62 @@ def grad(set):
             usableData[i][j] = data[i+1][j+1]
     print(usableData)
     return usableData
+
+def vectorGraph(set, pos1, pos2):
+    posx = pos1
+    posy = pos2
+    center = set[posy][posx]
+    state = True
+    vert = 0.
+    hori = 0.
+    for i in range (-1, 2):
+        for j in range(-1, 2):
+            if(center < set[posy + i][posx+j]):
+                state = False
+                break
+    if(state == False):
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                curr = set[posx + i][posy+j]
+                curr = center - curr
+                if((i == -1 and j==-1) or (i == -1 and j==1) or (i == 1 and j==-1) or (i == 1 and j==1)):
+                    curr /= 1.4142135
+                if(i == -1):
+                    vert +=curr
+                elif(i==1):
+                    vert -= curr
+                if(j==-1):
+                    hori -= curr
+                elif(j==1):
+                    hori += curr
+                if(i==-1 and j ==0):
+                    vert += curr
+                elif(i==0 and j ==-1):
+                    hori -= curr
+                elif(i==0 and j ==1):
+                    hori += curr
+                elif(i==1 and j ==0):
+                    vert -= curr
+    if(state == False):
+        sq = np.sqrt(vert * vert + hori * hori)
+    else:
+        return (0,0)
+    return (hori/sq,vert/sq)
+
+def draw2(usableData):
+    store = np.zeros((38,38,2))
+    img = Image.new('RGB', (380, 380), "black")  # create a new black image
+    img1 = ImageDraw.Draw(img)
+    for i in range(1,39):
+        for j in range(1,39):
+            store[j-1][i-1] = vectorGraph(usableData,j,i)
+    scale = 3
+    for i in range(0,38):
+        for j in range(0,38):
+            img1.line([(i * 10 + 5+ scale*store[i][j][1],j * 10 + 5 - scale*store[i][j][0]), (i * 10 + 5-scale*store[i][j][1], j * 10 + 5+scale*store[i][j][0])], width=0)
+    img.show()
+
+    return store
 
 def highestPointer(set, highest):
     data = np.zeros(8)
@@ -90,9 +143,17 @@ def draw(usableData):
     img.show()
 
 def main():
-    pathi = "/Users/joshchung/Desktop/crossVal/group1/good855.csv"
+    pathi = "/Users/joshchung/Desktop/cross/g8/Sampled_t419p8_x0_y38p72_z27p54_layer55.csv"
     set = dataInput(pathi)
-    draw(grad(set))
+    for i in range(1, 38):
+        print(i)
+    camp = draw2(set)
+    for i in range (len(camp)):
+        for j in range (len(camp[i])):
+            for k in range (2):
+                print(camp[i][j][k], end=" ")
+            print("", end=" ")
+        print()
 
 if __name__ == "__main__":
     main()

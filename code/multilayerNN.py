@@ -137,7 +137,7 @@ class NeuralNetwork:
                     while (len(fname) != 0):
                         index = random.randint(0,len(fname))
                         dir = fname[index]
-                        self.train(self.dataInputOutline(dir),self.dataOutput(dir))
+                        self.train(self.dataInputCompact(dir),self.dataOutput(dir))
                         fname.pop(index)
                 check = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupSkip) + "/*.csv")
                 badcount = 0
@@ -146,11 +146,11 @@ class NeuralNetwork:
                 goodcountcorrect = 0
                 for item in check:
                     if (item.find("bad")!=-1):
-                        if (self.test(self.dataInputOutline(item)) > .7):
+                        if (self.test(self.dataInputCompact(item)) > .7):
                             badcountcorrect += 1
                         badcount += 1
                     else:
-                        if (self.test(self.dataInputOutline(item)) < .2):
+                        if (self.test(self.dataInputCompact(item)) < .2):
                             goodcountcorrect += 1
                         goodcount += 1
                 """
@@ -162,27 +162,51 @@ class NeuralNetwork:
                 thisRow = [str(prevCount + self.count),"Test group:" + str(groupSkip), "Total correct:", str((badcountcorrect + goodcountcorrect)/(badcount + goodcount)), "Bad correct:", str(badcountcorrect) + "/" + str(badcount), "Good correct:", str(goodcountcorrect) + "/" + str(goodcount)]
                 writer.writerow(thisRow)
 
-    def testCases(self):
+    def testCases4040(self):
         fname = glob.glob("/Users/joshchung/Desktop/4040testCases/*.csv")
         g = 0
         b = 0
         gc = 0
         bc = 0
         for item in fname:
-            guess = self.test(self.dataInputOutline(item))
+            guess = self.test(self.dataInputCompact(item))
+
+            if (item.find("bad") != -1):
+                b += 1
+                if (guess > .50):
+                    bc += 1
+                else:
+                    print(item[39:], guess)
+            else:
+                g += 1
+                if (guess < .50):
+                    gc += 1
+                else:
+                    print(item[39:], guess)
+
+        print("Bad" + str(bc) + "/" + str(b))
+        print("good" + str(gc) + "/" + str(g))
+    def testCases3030(self):
+        fname = glob.glob("/Users/joshchung/Desktop/testCases/*.csv")
+        g = 0
+        b = 0
+        gc = 0
+        bc = 0
+        for item in fname:
+            guess = self.test(self.dataInputCompact(item))
 
             if (item.find("bad") != -1):
                 b += 1
                 if (guess > .15):
                     bc += 1
                 else:
-                    print(item[39:], guess)
+                    print(item[35:], guess)
             else:
                 g += 1
                 if (guess < .15):
                     gc += 1
                 else:
-                    print(item[39:], guess)
+                    print(item[35:], guess)
 
         print("Bad" + str(bc) + "/" + str(b))
         print("good" + str(gc) + "/" + str(g))
@@ -192,10 +216,10 @@ def main():
 
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
-    nnOutline = NeuralNetwork(1600,1,75,16,.01, False, path+'outlineweights608400.csv')
-    #nn2 = NeuralNetwork(900,1,50,16,.005, False, path+'weights2770200.csv')
-    #nn2.testCases()
-    nnOutline.testCases()
+    nnOutline = NeuralNetwork(1600,1,75,16,.005, False, path+'outlineweights228150.csv')
+    nn2 = NeuralNetwork(900,1,50,16,.005, False, path+'weights2770200.csv')
+    nn2.testCases3030()
+    nnOutline.testCases4040()
 
     for i in range(0):
         print(i)
