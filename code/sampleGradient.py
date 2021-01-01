@@ -145,13 +145,13 @@ def draw(usableData):
 def main():
     pathi = "/Users/joshchung/Desktop/cross/g8/Sampled_t419p8_x0_y38p72_z27p54_layer55.csv"
     set = dataInput(pathi)
-    for i in range(1, 38):
-        print(i)
     camp = draw2(set)
     for i in range (len(camp)):
         for j in range (len(camp[i])):
+            print("(", end="")
             for k in range (2):
                 print(camp[i][j][k], end=" ")
+            print(")", end="")
             print("", end=" ")
         print()
 
