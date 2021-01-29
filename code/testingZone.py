@@ -1,11 +1,12 @@
 import numpy as np
+from numpy import random
 import glob
 import csv
 data = [1,0,1,0]
 weights = [1,2,5,4]
 
 
-weights2   = np.ones((4, 1))
+weights2 = np.ones((4, 1))
 def mult(x,y):
     set = np.zeros((len(x),len(y)))
     lenX = len(x)
@@ -17,15 +18,8 @@ def mult(x,y):
 
 
 def main():
-    name = "/Users/joshchung/Desktop/crossVal/group1/90bad1.csv"
-    with open(name, newline='') as csvfile:
-        data_list = list(csv.reader(csvfile))
-        arr = np.array(data_list).astype(np.float).flatten()
-        high = np.amax(arr)
-        low = np.amin(arr)
-        arr -= low
-        arr /= (high - low)
-    print( arr)
+    bias1 = np.random.rand(1,1)
+    print(bias1)
 
 
 def dataInput():

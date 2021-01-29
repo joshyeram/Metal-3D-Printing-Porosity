@@ -10,14 +10,22 @@ def sigmoid(x):
 def sigmoid_derivative(x):
     return x * (1.0 - x)
 
+#input->w1->hidden1->w2->hidden2->w3->output
+
 class NeuralNetwork:
     def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile):
         self.weights1 = np.random.rand(inputSize, hiddenSize1)
         self.weights2 = np.random.rand(hiddenSize1, hiddenSize2)
         self.weights3 = np.random.rand(hiddenSize2, outputSize)
+        self.bias1 = np.random.rand(1,1)
+        self.bias2 = np.random.rand(1, 1)
+        self.bias3 = np.random.rand(1, 1)
         self.randomize(self.weights1)
         self.randomize(self.weights2)
         self.randomize(self.weights3)
+        self.randomize(self.bias1)
+        self.randomize(self.bias2)
+        self.randomize(self.bias3)
         self.inputSize = inputSize
         self.outputSize = outputSize
         self.hiddenSize1 = hiddenSize1
@@ -89,40 +97,150 @@ class NeuralNetwork:
         self.weights1 += self.lr * d_weights1
 
         self.count += 1
-
-    def trainWithFmeasure(self, input, output):
+    def trainMinibatch(self,inputDir):
         tp = 0
         fp = 0
         fn = 0
+        tn = 0
+        tempDw1 = 0
+        tempDw2 = 0
+        tempDw3 = 0
+        counter = 0
+        while (len(inputDir) != 0):
+            for i in range(50):
+                if(len(inputDir) == 0):
+                    break
 
-        for path in input:
-            layer1 = sigmoid(np.dot(self.dataInputCompact(path), self.weights1))
+                index = random.randint(0, len(inputDir))
+                dir = inputDir[index]
+                inputDir.pop(index)
+
+                layer1 = sigmoid(np.dot(self.dataInputCompact(dir), self.weights1))
+                layer2 = sigmoid(np.dot(layer1, self.weights2))
+                guess = sigmoid(np.dot(layer2, self.weights3))
+                output = self.dataOutput(dir)
+                cost = output - guess
+
+                firstChain = 2 * cost * sigmoid_derivative(guess)
+                tempDw3 += np.dot(layer2.T, firstChain)
+
+                secondChain = np.dot(firstChain, self.weights3.T) * sigmoid_derivative(layer2)
+                tempDw2 += np.dot(layer1.T, secondChain)
+
+                thirdChain = np.dot(secondChain, self.weights2.T) * sigmoid_derivative(layer1)
+                tempDw1 += np.dot(self.dataInputCompact(dir).T, thirdChain)
+                counter+=1
+
+                if (guess >= .2 and output == 1):
+                    tp += 1
+                if (guess >= .2 and output == 0):
+                    fp += 1
+                if (guess < .2 and output == 1):
+                    fn += 1
+                if (guess < .2 and output == 0):
+                    tn += 1
+                self.count += 1
+            self.weights3 += self.lr * tempDw3/counter
+            self.weights2 += self.lr * tempDw2/counter
+            self.weights1 += self.lr * tempDw1/counter
+            counter = 0
+            tempDw3 = 0
+            tempDw2 = 0
+            tempDw1 = 0
+            currFM = self.fmeasure(tp, fp, fn, tn)
+            print(currFM)
+
+    def trainWithFmeasure(self, inputDir):
+        tp = 0
+        fp = 0
+        fn = 0
+        tn = 0
+        collected = 0
+        currArray = []
+
+        while(len(inputDir)!=0):
+            index = random.randint(0, len(inputDir))
+            dir = inputDir[index]
+            currArray.append(dir)
+            inputDir.pop(index)
+
+            layer1 = sigmoid(np.dot(self.dataInputCompact(dir), self.weights1))
             layer2 = sigmoid(np.dot(layer1, self.weights2))
             guess = sigmoid(np.dot(layer2, self.weights3))
-            tp += guess * output.item()
-            fp += guess * (1-output.item())
-            fn += (1-guess) * output.item()
+            output = self.dataOutput(dir)
 
-        fm = ((1 + 2 * 2) * tp) / ((1 + 2 * 2) * tp + (2*2)*fn + fp)
-        dfm = 0
+            if (guess >= .2 and output == 1):
+                tp += 1
+            if (guess >= .2 and output == 0):
+                fp += 1
+            if (guess < .2 and output == 1):
+                fn += 1
+            if (guess < .2 and output == 0):
+                tn += 1
+            collected +=1
 
+            if(collected>=50 or len(inputDir)==0):
+                currFM = self.fmeasure(tp, fp, fn, tn)
 
-        cost = output - guess
+                tempD1 = 0
+                tempD2 = 0
+                tempD3 = 0
+                while (len(currArray) != 0):
+                    temp = currArray.pop(0)
+                    layer1 = sigmoid(np.dot(self.dataInputCompact(temp), self.weights1))
+                    layer2 = sigmoid(np.dot(layer1, self.weights2))
+                    guess = sigmoid(np.dot(layer2, self.weights3))
 
-        firstChain = 2 * cost * sigmoid_derivative(guess)
-        d_weights3 = np.dot(layer2.T, firstChain)
+                    firstChain = 2 * (1 - currFM) * sigmoid_derivative(guess)
+                    tempD3 += np.dot(layer2.T, firstChain)
 
-        secondChain = np.dot(firstChain, self.weights3.T) * sigmoid_derivative(layer2)
-        d_weights2 = np.dot(layer1.T, secondChain)
+                    secondChain = np.dot(firstChain, self.weights3.T) * sigmoid_derivative(layer2)
+                    tempD2 += np.dot(layer1.T, secondChain)
 
-        thirdChain = np.dot(secondChain, self.weights2.T) * sigmoid_derivative(layer1)
-        d_weights1 = np.dot(input.T, thirdChain)
+                    thirdChain = np.dot(secondChain, self.weights2.T) * sigmoid_derivative(layer1)
+                    tempD1 += np.dot(self.dataInputCompact(temp).T, thirdChain)
 
-        self.weights3 += self.lr * d_weights3
-        self.weights2 += self.lr * d_weights2
-        self.weights1 += self.lr * d_weights1
+                self.weights3 += self.lr * (1.0 / collected) * tempD3
+                self.weights2 += self.lr * (1.0 / collected) * tempD2
+                self.weights1 += self.lr * (1.0 / collected) * tempD1
+                collected = 0
 
-        self.count += 10
+            self.count += 1
+
+    def fmeasure(self,tp, fp, fn, tn):
+        print((tp*1.0)/(tp + .5 * (fp+fn)))
+        return (tp*1.0)/(tp + .5 * (fp+fn))
+
+    def crossValFM(self):
+        path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/CrossValidationData.csv"
+        with open(path, 'a', newline='') as file:
+            writer = csv.writer(file)
+            prevCount = int(self.weightFile[self.weightFile.find("weights") + 7: self.weightFile.find(".csv")])
+            for groupSkip in range(1, 11):
+                for groupTrain in range(1, 11):
+                    if (groupSkip == groupTrain):
+                        continue
+                    fname = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupTrain) + "/*.csv")
+                    self.trainMinibatch(fname)
+                check = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupSkip) + "/*.csv")
+                badcount = 0
+                badcountcorrect = 0
+                goodcount = 0
+                goodcountcorrect = 0
+                for item in check:
+                    if (item.find("bad") != -1):
+                        if (self.test(self.dataInputCompact(item)) > .7):
+                            badcountcorrect += 1
+                        badcount += 1
+                    else:
+                        if (self.test(self.dataInputCompact(item)) < .2):
+                            goodcountcorrect += 1
+                        goodcount += 1
+                thisRow = [str(prevCount + self.count), "Test group:" + str(groupSkip), "Total correct:",
+                           str((badcountcorrect + goodcountcorrect) / (badcount + goodcount)), "Bad correct:",
+                           str(badcountcorrect) + "/" + str(badcount), "Good correct:",
+                           str(goodcountcorrect) + "/" + str(goodcount)]
+                writer.writerow(thisRow)
 
     def test(self, input):
         layer1 = sigmoid(np.dot(input, self.weights1))
@@ -235,7 +353,7 @@ class NeuralNetwork:
 
         print("Bad" + str(bc) + "/" + str(b))
         print("good" + str(gc) + "/" + str(g))
- #f-measure
+
     def testCases4040out(self):
         fname = glob.glob("/Users/joshchung/Desktop/4040testCases/*.csv")
         g = 0
@@ -439,42 +557,15 @@ def main():
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile): fm for bad
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
 
-    nn4040 = NeuralNetwork(1600,1,75,16,.005, False, path+'4040weights1064700.csv')
-    nn3030 = NeuralNetwork(900, 1, 50, 16, .005, False, path + '3030weights2770200.csv')
-    nnFinal = NeuralNetwork(3, 1, 4, 4, .1, False, path + 'combinedweights152100.csv')
-    nnFinal.testCasesFinal(nn4040,nn3030)
-    print()
-    nn4040.testCases4040()
+    nn4040fm = NeuralNetwork(1600,1,75,16,.1, False, path+'4040fmweights0.csv')
 
-    for i in range(0):
+    for i in range(20):
         print(i)
-        nnFinal.combine(nn4040, nn3030)
-        #nn4040.crossVal()
-    #nnFinal.save()
-    #nn4040.save()
+        nn4040fm.crossValFM()
+    nn4040fm.save()
+
+    nn4040fm.testCases4040()
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-    """
-    for i in range(30000):
-        x = random.randint(0, 2)
-        y = random.randint(0, 2)
-        if (x==y):
-            nn.train(np.array([[x,y]]), np.array([[1]]))
-        else:
-            nn.train(np.array([[x, y]]), np.array([[0]]))
-    nn.save()
-    for i in range(20):
-        x = random.randint(0, 2)
-        y = random.randint(0, 2)
-        print(x,y)
-        print(nn.test(np.array([[x, y]])))
-        print()
-    """

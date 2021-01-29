@@ -54,6 +54,7 @@ class NeuralNetwork:
         with open('porosityName.csv', newline='') as csvfile:
             data_list = list(csv.reader(csvfile))
         self.bad = data_list
+
     def trainTest(self,input, output):
         layer1 = sigmoid(np.dot(input, self.weights1))
         self.guess = sigmoid(np.dot(layer1, self.weights2))
