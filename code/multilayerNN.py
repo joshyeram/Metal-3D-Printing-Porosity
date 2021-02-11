@@ -110,7 +110,6 @@ class NeuralNetwork:
             for i in range(50):
                 if(len(inputDir) == 0):
                     break
-
                 index = random.randint(0, len(inputDir))
                 dir = inputDir[index]
                 inputDir.pop(index)
@@ -129,26 +128,35 @@ class NeuralNetwork:
 
                 thirdChain = np.dot(secondChain, self.weights2.T) * sigmoid_derivative(layer1)
                 tempDw1 += np.dot(self.dataInputCompact(dir).T, thirdChain)
-                counter+=1
 
-                if (guess >= .2 and output == 1):
-                    tp += 1
-                if (guess >= .2 and output == 0):
-                    fp += 1
-                if (guess < .2 and output == 1):
-                    fn += 1
-                if (guess < .2 and output == 0):
-                    tn += 1
+                counter+=1
                 self.count += 1
-            self.weights3 += self.lr * tempDw3/counter
-            self.weights2 += self.lr * tempDw2/counter
-            self.weights1 += self.lr * tempDw1/counter
+
+                if (guess >= .5 and output == 1):
+                    tp += 1
+                elif (guess >= .5 and output == 0):
+                    fp += 1
+                elif (guess < .5 and output == 1):
+                    fn += 1
+                elif (guess < .5 and output == 0):
+                    tn += 1
+
+            currFMoffset = 1 - self.fmeasure(tp, fp, fn, tn)
+            #print(currFMoffset)
+
+
+            self.weights3 += self.lr * currFMoffset * tempDw3/counter
+            self.weights2 += self.lr * currFMoffset * tempDw2/counter
+            self.weights1 += self.lr * currFMoffset * tempDw1/counter
             counter = 0
             tempDw3 = 0
             tempDw2 = 0
             tempDw1 = 0
-            currFM = self.fmeasure(tp, fp, fn, tn)
-            print(currFM)
+            tp = 0
+            fp = 0
+            fn = 0
+            tn = 0
+            #print(currFM)
 
     def trainWithFmeasure(self, inputDir):
         tp = 0
@@ -208,8 +216,15 @@ class NeuralNetwork:
             self.count += 1
 
     def fmeasure(self,tp, fp, fn, tn):
-        print((tp*1.0)/(tp + .5 * (fp+fn)))
-        return (tp*1.0)/(tp + .5 * (fp+fn))
+        if(tp+fp == 0):
+            return 0
+        f1 = (tp*1.0)/(tp + .5 * (fp+fn))
+        b = .5
+        f2 = ((1+b*b) * tp) / (((1+b*b) * tp)+(b*b*fn)+fp)
+        """print("tp:"+str(tp)+"  fp:"+str(fp)+"  fn:"+str(fn)+"  tn:"+str(tn))
+        print("f1:"+ str(f1))
+        print("f pt5:" + str(f2))"""
+        return f2
 
     def crossValFM(self):
         path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/CrossValidationData.csv"
@@ -229,11 +244,11 @@ class NeuralNetwork:
                 goodcountcorrect = 0
                 for item in check:
                     if (item.find("bad") != -1):
-                        if (self.test(self.dataInputCompact(item)) > .7):
+                        if (self.test(self.dataInputCompact(item)) >= .5):
                             badcountcorrect += 1
                         badcount += 1
                     else:
-                        if (self.test(self.dataInputCompact(item)) < .2):
+                        if (self.test(self.dataInputCompact(item)) < .5):
                             goodcountcorrect += 1
                         goodcount += 1
                 thisRow = [str(prevCount + self.count), "Test group:" + str(groupSkip), "Total correct:",
@@ -402,7 +417,6 @@ class NeuralNetwork:
 
         print("Bad" + str(bc) + "/" + str(b))
         print("good" + str(gc) + "/" + str(g))
-
     def testCasesFinal(self, n4040, n3030):
         fname = glob.glob("/Users/joshchung/Desktop/4040testCases/*.csv")
         g = 0
@@ -438,19 +452,6 @@ class NeuralNetwork:
         print("Bad" + str(bc) + "/" + str(b))
         print("good" + str(gc) + "/" + str(g))
 
-    # 4040
-    # 3030
-    # z height
-
-
-
-    # 3 4 4 1
-    # p0000_0_layer1 = 0
-    # z0_layer1 = 0
-    # find z later
-    # cut off _layer
-    # replace p with .
-    # float it
     def testing(self):
         for groupSkip in range(1, 11):
             for groupTrain in range(1, 11):
@@ -557,14 +558,16 @@ def main():
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile): fm for bad
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
 
-    nn4040fm = NeuralNetwork(1600,1,75,16,.1, False, path+'4040fmweights0.csv')
-
-    for i in range(20):
+    nn4040fm = NeuralNetwork(1600,1,150,25,.1, False, path+'4040fmminibatchweights304200.csv')
+    #nn4040 = NeuralNetwork(1600, 1, 75, 16, .1, False, path + '4040weights1064700.csv')
+    for i in range(0):
         print(i)
         nn4040fm.crossValFM()
-    nn4040fm.save()
+    #nn4040fm.save()
 
     nn4040fm.testCases4040()
+    print()
+    #nn4040.testCases4040()
 
 
 if __name__ == "__main__":

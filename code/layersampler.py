@@ -1,6 +1,7 @@
 import csv
 from PIL import Image
 import glob
+from decimal import Decimal
 import numpy as np
 import math
 
@@ -9,9 +10,22 @@ globalG = 300
 rows, cols = (40, 40)
 
 def main():
-    path = "/Users/joshchung/Desktop/converted/*.csv"
-    count = 0
-    for fname in glob.glob(path):
+    ir = []
+    pyro = []
+    path1 = "/Users/joshchung/Desktop/IR/*.csv"
+    paths1 = glob.glob(path1)
+    path2 = "/Users/joshchung/Desktop/converted/*.csv"
+    paths2 = glob.glob(path2)
+    for name in paths1:
+        ir.append(pos(name))
+    for name in paths2:
+        pyro.append(pos(name))
+    closet(ir[0],pyro)
+    for i in ir:
+        print(i)
+        closet(i,pyro)
+        print()
+    """for fname in glob.glob(path):
         print(count)
         count +=1
         with open(fname, newline='') as csvfile:
@@ -39,8 +53,42 @@ def main():
         with open('/Users/joshchung/Desktop/Sampled/Sampled_'+name, 'w', newline='') as file:
             writer = csv.writer(file)
             for i in range(rows):    # for every col:
-                writer.writerow(final[i])
-
+                writer.writerow(final[i])"""
+def closet(ir, pyro):
+    y = ir[0]
+    z = ir[1]
+    same = []
+    for arr in pyro:
+        if(arr[1]==z):
+            same.append(arr[0])
+    check = np.array(same)
+    check.sort()
+    if(y<=check[0]):
+        print(check[0])
+    if(y>=check[len(check)-1]):
+        print(check[len(check)-1])
+    for i in range(1,len(check)):
+        if(check[i]==y):
+            print(check[i])
+            break
+        if(check[i-1]<y and check[i]>y):
+            print(check[i])
+            break
+def pos(name):
+    y = name.find("y")
+    z = name.find("z")
+    layer = name.find("_layer")
+    pY = name[y:].find("p")
+    actualY = name[y + 1:y + pY] + "." + name[y + pY + 1:z - 1]
+    pZ = name[z:].find("p")
+    if(pZ==-1):
+        pZ=2
+    actualZ = name[z + 1:z + pZ] + "." + name[z + pZ + 1:layer]
+    if(name.find("t0p0000_0_0p0000_0_layer1.csv")!=-1):
+        #print(0, 0)
+        return float(0), float(0)
+    #print(actualY, actualZ)
+    return float(actualY), float(actualZ)
         
 def rgb(minimum, maximum, value):
     minimum, maximum = float(minimum), float(maximum)

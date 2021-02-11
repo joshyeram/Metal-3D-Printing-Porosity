@@ -5,7 +5,7 @@ import numpy as np
 def main():
     img = Image.new('RGB', (40, 40), "black")  # create a new black image
     pixel = img.load()
-    with open('/Users/joshchung/Desktop/Sampled/Sampled2_t404p6_x0_y25p17_z26p52_layer53.csv', newline='') as csvfile:
+    with open('/Users/joshchung/Desktop/4040testcases/90badSampled_t1p067_x0_y13p55_z0_layer1.csv', newline='') as csvfile:
         reader = csv.reader(csvfile)
         data_list = list(csv.reader(csvfile))
         x = len(data_list)
@@ -13,12 +13,23 @@ def main():
         for i in range(x):
             for j in range(x):
                 data[i][j] =  float(data_list[i][j])
-                print(data[i][j])
-                if(data[i][j] >=1630 and data[i][j] <=1640):
-                    #pixel[j,i] = (red(1550,1850,data[i][j]),green(1550,1850,data[i][j]),blue(1550,1850,data[i][j]))
-                    pixel[j, i] = (255,255,255)
+                pixel[j,i] = (red(1550,1850,data[i][j]),green(1550,1850,data[i][j]),blue(1550,1850,data[i][j]))
     img.show()
 
+    img1 = Image.new('RGB', (40, 40), "black")  # create a new black image
+    pixel1 = img1.load()
+    with open('/Users/joshchung/Desktop/4040testcases/90badSampled_t1p067_x0_y13p55_z0_layer1.csv',newline='') as csvfile:
+        data_list = list(csv.reader(csvfile))
+        arr = np.array(data_list).astype(np.float)
+        high = np.amax(arr)
+        low = np.amin(arr)
+        arr -= low
+        arr /= (high - low)
+
+    for i in range(40):
+        for j in range(40):
+            pixel1[j, i] = (int(255 * arr[i][j]), int(255 * arr[i][j]), int(255 * arr[i][j]))
+    img1.show()
 def red(min,max,val):
     if (relativePos(min, max, val) == 0):
         return 255

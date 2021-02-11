@@ -7,8 +7,7 @@ value = 1
 globalG = 300
 
 def main():
-    with open('/Users/joshchung/Desktop/converted/t92p22_x0_y42p59_z5p61_layer12.csv', newline='') as csvfile:
-        reader = csv.reader(csvfile)
+    with open('/Users/joshchung/Desktop/IR/t0p6572_x0_y8p347_z0_layer1.csv', newline='') as csvfile:
         data_list = list(csv.reader(csvfile))
         x = int(data_list[0][1])
         y = int(data_list[1][1])
@@ -18,8 +17,10 @@ def main():
         highest = 0
         mean = 0
 
+        highestj = 0
+        highesti = 0
 
-        data = [[0]* x for i in range(y)]
+        data = np.zeros((y,x))
 
         for j in range(0, y):
             for i in range(0, x):
@@ -27,31 +28,33 @@ def main():
                 data[j][i] = int(data_list[j+3][i])
                 if data[j][i] > float(highest):
                     highest = int(data_list[j+3][i])
+                    highestj = j
+                    highesti = i
         mean /= y * x
-        threshold = int(topPercent(data_list, .01, x, y))
+        threshold = int(topPercent(data_list, .04, x, y))
 
         print(threshold)
         print(mean)
         print(highest)
 
-        img = Image.new( 'RGB', (x,y), "black")# create a new black image
+        img = Image.new( 'RGB', (20,130), "black")# create a new black image
         pixels = img.load() # create the pixel map
 
 
-        for i in range(y):    # for every col:
-            for j in range(x):    # For every row
+        for i in range(20):
+            for j in range(130):
                 #print(i,j)
                 #print(data[j][i])
-                if data[i][j] < threshold:
-                    continue
+                """if data[i][j] < threshold:
+                    continue"""
                 #pixels[i,j] = (sinRGB(int(data_list[j+3][i]), threshold, highest), cosRGB(int(data_list[j+3][i]), threshold, highest), tanRGB(int(data_list[j+3][i]), threshold, highest))
                 #pixels[i, j] = (cosRGB(int(data_list[j + 3][i]), threshold, highest), cosRGB1(int(data_list[j + 3][i]), threshold, highest),cosRGB2(int(data_list[j + 3][i]), threshold, highest))
                 #pixels[j, i] = (rgb(threshold,highest,data[j][i]))
-                pixels[j,i] = (red(threshold,highest,data[i][j]),green(threshold,highest,data[i][j]),blue(threshold,highest,data[i][j]))
+                pixels[i,j] = (red(threshold,highest,data[j+56][i-10+highesti]),green(threshold,highest,data[j+56][i-10+highesti]),blue(threshold,highest,data[j+56][i-10+highesti]))
                 #print(data[i][j],red(threshold,highest,data[i][j]),green(threshold,highest,data[i][j]),blue(threshold,highest,data[i][j]))
                 ##print(data[i][j],relativePos(threshold, highest, data[i][j]),red(threshold,highest,data[i][j]),green(threshold,highest,data[i][j]),blue(threshold,highest,data[i][j]))
-        pixels[467, 247] = (0,0,0)
-        drawGrad(x,y,highest,threshold,pixels)
+        #pixels[10, 30] = (255,0,0)
+        #drawGrad(x,y,highest,threshold,pixels)
         img.show()
 """
 def cosRGB(i,t,h):
