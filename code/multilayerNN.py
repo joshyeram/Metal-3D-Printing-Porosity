@@ -97,6 +97,7 @@ class NeuralNetwork:
         self.weights1 += self.lr * d_weights1
 
         self.count += 1
+
     def trainMinibatch(self,inputDir):
         tp = 0
         fp = 0
@@ -549,7 +550,12 @@ class NeuralNetwork:
                            str(badcountcorrect) + "/" + str(badcount), "Good correct:",
                            str(goodcountcorrect) + "/" + str(goodcount)]
                 writer.writerow(thisRow)
-
+    def standard(self,arr):
+        high = np.amax(arr)
+        low = np.amin(arr)
+        arr -= low
+        arr /= (high - low)
+        return np.array([arr])
 
 
 def main():
@@ -558,17 +564,32 @@ def main():
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile): fm for bad
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
 
-    nn4040fm = NeuralNetwork(1600,1,150,25,.1, False, path+'4040fmminibatchweights304200.csv')
-    #nn4040 = NeuralNetwork(1600, 1, 75, 16, .1, False, path + '4040weights1064700.csv')
-    for i in range(0):
+    nnIR = NeuralNetwork(2600,1,250,25,.03, False, path+'IRbareweights65940.csv')
+    for i in range(30):
         print(i)
-        nn4040fm.crossValFM()
-    #nn4040fm.save()
+        patho = glob.glob("/Users/joshchung/Desktop/nparrays/*.npy")
+        for paths in patho:
+            p = np.load(paths).flatten()
+            nnIR.train(nnIR.standard(p),nnIR.dataOutput(paths))
 
-    nn4040fm.testCases4040()
-    print()
-    #nn4040.testCases4040()
-
+    nnIR.save()
+    patho = glob.glob("/Users/joshchung/Desktop/nparrays/*.npy")
+    right = 0
+    wrong = 0
+    for paths in patho:
+        p = np.load(paths).flatten()
+        temp = nnIR.test(nnIR.standard(p))
+        if(temp>=.5 and nnIR.dataOutput(paths)<.5):
+            print(temp, paths)
+            wrong+=1
+        elif (temp <= .5 and nnIR.dataOutput(paths) > .5):
+            print(temp, paths)
+            wrong += 1
+        else:
+            right+=1
+    print("correct: "+ str(right))
+    print("incorrect: " + str(wrong))
+    print("frac: " + str(right/(right+wrong)))
 
 if __name__ == "__main__":
     main()

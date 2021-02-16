@@ -18,8 +18,8 @@ def mult(x,y):
 
 
 def main():
-    bias1 = np.random.rand(1,1)
-    print(bias1)
+    patho = glob.glob('/Users/joshchung/Desktop/nparrays/*.npy')
+    print(patho)
 
 
 def dataInput():

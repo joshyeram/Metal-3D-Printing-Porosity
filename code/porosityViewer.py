@@ -4,9 +4,9 @@ from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 
 def main():
-    plt.figure(figsize=(25, 25))
+    plt.figure(figsize=(12, 10))
     ax = plt.axes(projection="3d")
-    name = "/Users/joshchung/Downloads/PorosityIndexData.csv"
+    name = "/Users/joshchung/Desktop/PorosityIndexData.csv"
     yBad = np.zeros(71)
     zBad = np.zeros(71)
     xBad = np.zeros(71)

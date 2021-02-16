@@ -1,16 +1,48 @@
 import csv
 from PIL import Image
 import glob
+import os
+from os import path
 from decimal import Decimal
 import numpy as np
 import math
 
 value = 1
 globalG = 300
-rows, cols = (40, 40)
+rows, cols = (130, 20)
 
 def main():
-    ir = []
+    path1 = "/Users/joshchung/Desktop/IR/*.csv"
+    paths1 = glob.glob(path1)
+    for fname in paths1:
+        with open(fname, newline='') as csvfile:
+            data_list = list(csv.reader(csvfile))
+            x = int(data_list[0][1])
+            y = int(data_list[1][1])
+            convert = np.zeros((y, x))
+            final = np.zeros((rows, cols))
+            highest = np.array([0, 0, 0])
+            for i in range(0, y):
+                for j in range(0, x):
+                    convert[i][j] = float(data_list[i + 3][j])
+                    if convert[i][j] > float(highest[0]):
+                        highest[0] = int(data_list[i + 3][j])
+                        highest[1] = i
+                        highest[2] = j
+            indexY = int(highest[1] - rows / 2)
+            indexX = int(highest[2] - cols / 2)
+            for i in range(rows):  # for every col:
+                for j in range(cols):  # For every row
+                    final[i][j] = convert[i +56][j + indexX]
+            #print(final)
+            name = fname[fname.find("/IR")+4:]
+            print(name)
+            with open('/Users/joshchung/Desktop/Sampled/Sampled_' + name, 'w', newline='') as file:
+                writer = csv.writer(file)
+                for i in range(rows):  # for every col:
+                    writer.writerow(final[i])
+    """ir = []
+    count = 0
     pyro = []
     path1 = "/Users/joshchung/Desktop/IR/*.csv"
     paths1 = glob.glob(path1)
@@ -20,60 +52,62 @@ def main():
         ir.append(pos(name))
     for name in paths2:
         pyro.append(pos(name))
-    closet(ir[0],pyro)
     for i in ir:
-        print(i)
-        closet(i,pyro)
-        print()
+        file = closet(i,pyro)
+        if(len(file)==0):
+            continue
+        for j in file:
+            pathsToCheck = j[j.find("converted/")+10:]
+            if(checkIfbad(pathsToCheck)==1):
+                count+=1
+                #print(path.exists(i[0]))
+                if(path.exists(i[0])==False):
+                    #print(i[0])
+                    break
+
+                os.rename(i[0], i[0][:i[0].find("/IR")+4]+"bad"+i[0][i[0].find("/IR")+4:])
+            continue
+    print(count)"""
+    """print(i[0])
+                    print(i[0][:i[0].find("/IR")+4]+"bad"+i[0][i[0].find("/IR")+4:])
+                    print()"""
     """for fname in glob.glob(path):
         print(count)
         count +=1
         with open(fname, newline='') as csvfile:
             point = fname.find("ed/") + 3
             name = fname[point:]
-            data_list = list(csv.reader(csvfile))
-            x = int(data_list[0][1])
-            y = int(data_list[1][1])
-            convert = np.zeros((y,x))
-            final = np.zeros((rows, cols))
-            highest = np.array([0,0,0])
-            for i in range(0, y):
-                for j in range(0, x):
-                    #print(i+3,j)
-                    convert[i][j] = float(data_list[i+3][j])
-                    if convert[i][j] > float(highest[0]):
-                        highest[0] = int(data_list[i+3][j])
-                        highest[1] = i
-                        highest[2] = j
-            indexY = int(highest[1] - rows / 2)
-            indexX = int(highest[2] - cols / 2)
-            for i in range(rows):    # for every col:
-                for j in range(cols):    # For every row
-                    final[i][j] = convert[i+indexY][j+indexX]
+           
         with open('/Users/joshchung/Desktop/Sampled/Sampled_'+name, 'w', newline='') as file:
             writer = csv.writer(file)
             for i in range(rows):    # for every col:
                 writer.writerow(final[i])"""
 def closet(ir, pyro):
-    y = ir[0]
-    z = ir[1]
+    y = ir[1]
+    z = ir[2]
     same = []
     for arr in pyro:
-        if(arr[1]==z):
-            same.append(arr[0])
-    check = np.array(same)
-    check.sort()
-    if(y<=check[0]):
-        print(check[0])
-    if(y>=check[len(check)-1]):
-        print(check[len(check)-1])
-    for i in range(1,len(check)):
-        if(check[i]==y):
-            print(check[i])
-            break
-        if(check[i-1]<y and check[i]>y):
-            print(check[i])
-            break
+        if(arr[2]==z):
+            same.append((arr[0],arr[1]))
+    collect = []
+    #print(same)
+    for i in same:
+        if(i[1]==y):
+            collect.append(i[0])
+        if(y>i[1]-1 and y<i[1]+1):
+            collect.append(i[0])
+    #print(collect)
+    return collect
+
+def checkIfbad(name):
+    path2 = "/Users/joshchung/Desktop/cross/**/*.csv"
+    for fname in glob.glob(path2):
+        if(fname.find(name)!=-1):
+            if(fname.find("bad")!=-1):
+                return 1
+            else:
+                return 0
+
 def pos(name):
     y = name.find("y")
     z = name.find("z")
@@ -85,10 +119,8 @@ def pos(name):
         pZ=2
     actualZ = name[z + 1:z + pZ] + "." + name[z + pZ + 1:layer]
     if(name.find("t0p0000_0_0p0000_0_layer1.csv")!=-1):
-        #print(0, 0)
-        return float(0), float(0)
-    #print(actualY, actualZ)
-    return float(actualY), float(actualZ)
+        return name,float(0), float(0)
+    return name,float(actualY), float(actualZ)
         
 def rgb(minimum, maximum, value):
     minimum, maximum = float(minimum), float(maximum)
