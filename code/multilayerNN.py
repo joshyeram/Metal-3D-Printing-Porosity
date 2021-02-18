@@ -564,8 +564,8 @@ def main():
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile): fm for bad
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
 
-    nnIR = NeuralNetwork(2600,1,250,25,.03, False, path+'IRbareweights65940.csv')
-    for i in range(30):
+    nnIR = NeuralNetwork(2600,1,250,25,.005, False, path+'IRbareweights164850.csv')
+    for i in range(50):
         print(i)
         patho = glob.glob("/Users/joshchung/Desktop/nparrays/*.npy")
         for paths in patho:
