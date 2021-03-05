@@ -6,13 +6,17 @@ import numpy as np
 
 np.set_printoptions(threshold=np.inf)
 def main():
-    path1 = "/Users/joshchung/Desktop/Sampled1/*.csv"
+    path1 = "/Users/joshchung/Desktop/np4040parted/*p4.npy"
     paths1 = glob.glob(path1)
-    for i in range (len(paths1)):
+    for i in range(len(paths1)):
+        a = np.load(paths1[i])
+        b = np.rot90(a,2)
+        np.save(paths1[i], b)
+    """for i in range (len(paths1)):
         name = "/Users/joshchung/Desktop/np4040parted/np"+paths1[i][34:paths1[i].find(".csv")]+"p4.npy"
         test = dataInputCompact(paths1[i])
         print(name)
-        np.save(name, test)
+        np.save(name, test)"""
 """
 1 2
 3 4

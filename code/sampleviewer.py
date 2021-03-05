@@ -10,9 +10,11 @@ def main():
         data_list = list(csv.reader(csvfile))
         x = len(data_list)
         data = np.zeros((x,x))
-        for i in range(x):
-            for j in range(x):
-                data[i][j] =  float(data_list[i][j])
+        data = np.load('/Users/joshchung/Desktop/np4040/np180badSampled_t0p7622_x0_y9p680_z0_layer1.npy')
+        data = filtering(data)
+        for i in range(38):
+            for j in range(38):
+                #data[i][j] =  float(data_list[i][j])
                 pixel[j,i] = (red(1550,1850,data[i][j]),green(1550,1850,data[i][j]),blue(1550,1850,data[i][j]))
     img.show()
 
@@ -29,7 +31,9 @@ def main():
     for i in range(40):
         for j in range(40):
             pixel1[j, i] = (int(255 * arr[i][j]), int(255 * arr[i][j]), int(255 * arr[i][j]))
-    img1.show()
+    #img1.show()
+
+
 def red(min,max,val):
     if (relativePos(min, max, val) == 0):
         return 255
@@ -74,6 +78,14 @@ def relativePos(min, max, val):
         return 1
     else:
         return 0
+
+def filtering(arr):
+    newArr = np.zeros((len(arr)-2,len(arr)-2))
+    for i in range(1,len(arr)-1):
+        for j in range(1, len(arr)-1):
+            newArr[i-1][j-1] = 5*arr[i][j]-arr[i-1][j]-arr[i+1][j]-arr[i][j-1]-arr[i][j+1]
+    print(newArr)
+    return newArr
 if __name__ == "__main__":
     main()
 

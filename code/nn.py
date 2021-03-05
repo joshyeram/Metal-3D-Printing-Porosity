@@ -51,9 +51,6 @@ class NeuralNetwork:
         else:
             self.load(self.weightFile)
 
-        with open('porosityName.csv', newline='') as csvfile:
-            data_list = list(csv.reader(csvfile))
-        self.bad = data_list
 
     def trainTest(self,input, output):
         layer1 = sigmoid(np.dot(input, self.weights1))
@@ -213,9 +210,6 @@ class NeuralNetwork:
                     data[count] = (data[count]-1129)/(2107-1129)
                     count += 1
         set = np.array([data])
-        norm = set/np.sqrt(4470647879204)
-        #print(set,normal_array) 4470647879204
-        #print(norm)
         return set
 
     def getOutput(self, name):
@@ -235,28 +229,21 @@ def main():
     output = 1
     lr = .2
 
-    #nn = NeuralNetwork(input, output, hidden, lr, False, 'weights0.csv')
-    nnTesting = NeuralNetwork(900, 1, 100, lr, True, 'weights0.csv')
-    #print(nnTesting.test(nnTesting.dataInput("/Users/joshchung/Desktop/temp/90bad36.csv", 1)))
-    nnTesting.save()
-    for i in range(5):
-        print(i)
-        #print(nnTesting.test(nnTesting.dataInput("/Users/joshchung/Desktop/temp/90bad36.csv", 1)))
-        pathi = glob.glob("/Users/joshchung/Desktop/temp/*.csv")
-        while(len(pathi)!=0):
-            ro = random.randint(0,len(pathi))
-            fname = pathi[ro]
-            pathi.pop(ro)
-            #print(fname)
-            nnTesting.train(nnTesting.dataInput(fname,1),nnTesting.getOut(fname))
-
-    #nnTesting.save()
-    print(nnTesting.test(nnTesting.dataInput("/Users/joshchung/Desktop/temp/90bad36.csv", 1)))
+    nnTesting = NeuralNetwork(900, 1, 50, lr, False, '/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/visual/weights1092694.csv')
     print()
-    for i in range(1,1400):
-        print(nnTesting.test(nnTesting.dataInput("/Users/joshchung/Desktop/temp/good"+str(i)+".csv", 1)))
-    for i in range(1,71):
-        print(nnTesting.test(nnTesting.dataInput("/Users/joshchung/Desktop/temp/bad"+str(i)+".csv", 1)))
+    paths = glob.glob("/Users/joshchung/Desktop/testCases/*.csv")
+    badIncorrect = 0
+    goodIncorrect = 0
+    for i in paths:
+        temp = nnTesting.test(nnTesting.dataInput(i,1))
+        if(i.find("bad")!=-1 and temp<=.5):
+            print(i, temp)
+            badIncorrect+=1
+        elif (i.find("bad") == -1 and temp >= .5):
+            print(i, temp)
+            goodIncorrect+=1
+    print("badI",badIncorrect)
+    print("goodI", goodIncorrect)
 
 
 if __name__ == "__main__":
@@ -289,3 +276,11 @@ if __name__ == "__main__":
         print(nn.test(X[i]))
     nn.save()
 """
+"""for i in range(5):
+        print(i)
+        pathi = glob.glob("/Users/joshchung/Desktop/temp/*.csv")
+        while(len(pathi)!=0):
+            ro = random.randint(0,len(pathi))
+            fname = pathi[ro]
+            pathi.pop(ro)
+            nnTesting.train(nnTesting.dataInput(fname,1),nnTesting.getOut(fname))"""

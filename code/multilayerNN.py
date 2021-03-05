@@ -555,7 +555,7 @@ class NeuralNetwork:
         low = np.amin(arr)
         arr -= low
         arr /= (high - low)
-        return np.array([arr])
+        return np.array(arr)
 
 
 def main():
@@ -564,32 +564,52 @@ def main():
     # def __init__(self, inputSize, outputSize, hiddenSize1, hiddenSize2, lr, state, weightFile): fm for bad
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
 
-    nnIR = NeuralNetwork(2600,1,250,25,.005, False, path+'IRbareweights164850.csv')
-    for i in range(50):
-        print(i)
-        patho = glob.glob("/Users/joshchung/Desktop/nparrays/*.npy")
-        for paths in patho:
-            p = np.load(paths).flatten()
-            nnIR.train(nnIR.standard(p),nnIR.dataOutput(paths))
+    nn = NeuralNetwork(400,1,75,10,.01, False, path+'partedweights991200.csv')
+    nnIR = NeuralNetwork(2600,1,250,15,.01, False, path+'IRbareweights329700.csv')
+    paths = glob.glob("/Users/joshchung/Desktop/np4040parted/*.npy")
 
-    nnIR.save()
-    patho = glob.glob("/Users/joshchung/Desktop/nparrays/*.npy")
-    right = 0
-    wrong = 0
-    for paths in patho:
-        p = np.load(paths).flatten()
-        temp = nnIR.test(nnIR.standard(p))
-        if(temp>=.5 and nnIR.dataOutput(paths)<.5):
-            print(temp, paths)
-            wrong+=1
-        elif (temp <= .5 and nnIR.dataOutput(paths) > .5):
-            print(temp, paths)
-            wrong += 1
+    badIncorrect = 0
+    bc = 0
+    goodIncorrect = 0
+    gc = 0
+    for temp in paths:
+        temparray = nn.standard(np.load(temp)).flatten()
+        result = nn.test(temparray)
+        if (temp.find("bad") != -1 and result <= .5):
+            #print(result, temp)
+            badIncorrect += 1
+        elif (temp.find("bad") == -1 and result >= .5):
+            #print(result, temp)
+            goodIncorrect += 1
+        if(temp.find("bad") != -1):
+            bc+=1
         else:
-            right+=1
-    print("correct: "+ str(right))
-    print("incorrect: " + str(wrong))
-    print("frac: " + str(right/(right+wrong)))
+            gc+=1
+    print("badI", badIncorrect,"/",bc)
+    print("goodI", goodIncorrect,"/",gc)
+
+    badIncorrect = 0
+    goodIncorrect = 0
+    bc = 0
+    gc = 0
+    paths = glob.glob("/Users/joshchung/Desktop/nparrays/*.npy")
+    for temp in paths:
+        temparray = nnIR.standard(np.load(temp)).flatten()
+        result = nnIR.test(temparray)
+        if (temp.find("bad") != -1 and result <= .5):
+            print(result, temp)
+            badIncorrect += 1
+        elif (temp.find("bad") == -1 and result >= .5):
+            print(result, temp)
+            goodIncorrect += 1
+        if (temp.find("bad") != -1):
+            bc += 1
+        else:
+            gc += 1
+    print("badI for IR", badIncorrect,"/",bc)
+    print("goodI for IR", goodIncorrect,"/",gc)
+
+
 
 if __name__ == "__main__":
     main()
