@@ -9,12 +9,12 @@ import math
 
 value = 1
 globalG = 300
-rows, cols = (130, 20)
+rows, cols = (40, 40)
 
 def main():
-    path1 = "/Users/joshchung/Desktop/IR/*.csv"
-    paths1 = glob.glob(path1)
-    for fname in paths1:
+    fname = "/Users/joshchung/Desktop/converted/t306p7_x0_y29p04_z19p89_layer40.csv"
+    paths1 = glob.glob("/Users/joshchung/Desktop/converted/*.csv")
+    for i in paths1:
         with open(fname, newline='') as csvfile:
             data_list = list(csv.reader(csvfile))
             x = int(data_list[0][1])
@@ -33,14 +33,19 @@ def main():
             indexX = int(highest[2] - cols / 2)
             for i in range(rows):  # for every col:
                 for j in range(cols):  # For every row
-                    final[i][j] = convert[i +56][j + indexX]
+                    final[i][j] = convert[i +indexY][j + indexX]
+            np.save('testingMap.npy',final)
+        break
             #print(final)
+    """
             name = fname[fname.find("/IR")+4:]
             print(name)
             with open('/Users/joshchung/Desktop/Sampled/Sampled_' + name, 'w', newline='') as file:
                 writer = csv.writer(file)
                 for i in range(rows):  # for every col:
                     writer.writerow(final[i])
+            """
+
     """ir = []
     count = 0
     pyro = []

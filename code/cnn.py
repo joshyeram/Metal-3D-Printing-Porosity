@@ -3,6 +3,8 @@ import numpy as np
 from numpy import random
 from PIL import Image
 import csv
+import sys
+
 from os import path
 import glob
 
@@ -86,6 +88,7 @@ class NeuralNetwork:
         newArr -= np.amin(newArr)
         newArr /= div
         return np.array([newArr.flatten()])
+
     def getMax(self, a,b,c,d):
         if(b>a):
             a = b
@@ -195,18 +198,20 @@ class NeuralNetwork:
                 guess = self.test(self.filtering(item))
             if(which == "pooled" or which == "dspooled"):
                 guess = self.test(self.filteringPooled(item))
+            if(which == "normal"):
+                guess = self.test(self.standard(np.load(item)))
             if (item.find("bad") != -1):
                 b += 1
                 if (guess > .50):
                     bc += 1
                 elif(which.find("ds")==-1):
-                    print(item[30:], guess)
+                    print(item[32:], guess)
             else:
                 g += 1
                 if (guess < .50):
                     gc += 1
                 elif(which.find("ds")==-1):
-                    print(item[30:], guess)
+                    print(item[32:], guess)
 
         print("Bad" + str(bc) + "/" + str(b))
         print("good" + str(gc) + "/" + str(g))
@@ -216,24 +221,41 @@ class NeuralNetwork:
         low = np.amin(arr)
         arr -= low
         arr /= (high - low)
-        return np.array(arr)
+        #print(np.array([arr.flatten()]))
+        return np.array([arr.flatten()])
 
 def main():
     print("here")
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
     nn = NeuralNetwork(361, 1, 75, 25, .1, False, path + 'filteringpooledweights212400.csv')
-
+    nnFiltered = NeuralNetwork(1444, 1, 75, 25, .1, False, path + 'filteringweights442500.csv')
+    nnNormal = NeuralNetwork(1600, 1, 75, 16, .01, False, path + '4040randomweights177000.csv')
+    np.set_printoptions(threshold=sys.maxsize)
+    a = nnFiltered.weights1
+    b = nnFiltered.weights2
+    c = nnFiltered.weights3
+    d = np.array([a,b,c])
+    np.save('combined.npy', d)
     for i in range(0):
         print(i)
-        if(i==50):
-            nn.lr = .05
-        if(i==80):
-            nn.lr = .01
-        for j in glob.glob('/Users/joshchung/Desktop/np4040/*.npy'):
-            nn.train(nn.filteringPooled(j),nn.dataOutput(j))
+        if(i==300):
+            nnNormal.lr = .005
+            nnNormal.testCases4040("normal")
+        if(i==450):
+            nnNormal.lr = .0001
+            nnNormal.testCases4040("normal")
+        tempPaths = glob.glob('/Users/joshchung/Desktop/np4040/*.npy')
+        np.random.shuffle(tempPaths)
+        for j in tempPaths:
+            nnNormal.train(nnNormal.standard(np.load(j)),nnNormal.dataOutput(j))
         #nn.testCases4040("dspooled")
+    print("\npooled")
     nn.testCases4040("pooled")
-    nn.save()
+    print("\nfilter only")
+    nnFiltered.testCases4040("filter")
+    print("\nnormal")
+    nnNormal.testCases4040("normal")
+
 
 """def filtering(arr):
     newArr = np.zeros((len(arr)-2,len(arr)-2))
