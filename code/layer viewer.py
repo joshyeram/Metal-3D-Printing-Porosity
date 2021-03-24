@@ -5,9 +5,14 @@ import math
 
 value = 1
 globalG = 300
-
+def filtering(arr):
+    newArr = np.zeros((len(arr) - 2, len(arr) - 2))
+    for i in range(1, len(arr) - 1):
+        for j in range(1, len(arr) - 1):
+            newArr[i - 1][j - 1] = 5 * arr[i][j] - arr[i - 1][j] - arr[i + 1][j] - arr[i][j - 1] - arr[i][j + 1]
+    return newArr
 def main():
-    with open('/Users/joshchung/Desktop/IR/t0p6572_x0_y8p347_z0_layer1.csv', newline='') as csvfile:
+    with open('/Users/joshchung/Desktop/converted/t299p1_x0_y23p23_z19p38_layer39.csv', newline='') as csvfile:
         data_list = list(csv.reader(csvfile))
         x = int(data_list[0][1])
         y = int(data_list[1][1])
@@ -31,31 +36,47 @@ def main():
                     highestj = j
                     highesti = i
         mean /= y * x
-        threshold = int(topPercent(data_list, .04, x, y))
+        threshold = int(topPercent(data_list, .01, x, y))
 
         print(threshold)
         print(mean)
         print(highest)
-
-        img = Image.new( 'RGB', (20,130), "black")# create a new black image
+        print(highestj)
+        print(highesti)
+        img = Image.new( 'RGB', (40,40), "black")# create a new black image
         pixels = img.load() # create the pixel map
+        data1 = np.zeros((40, 40))
 
-
-        for i in range(20):
-            for j in range(130):
+        for i in range(40):
+            for j in range(40):
                 #print(i,j)
                 #print(data[j][i])
-                """if data[i][j] < threshold:
-                    continue"""
+                if data[highestj+j-20][highesti+i-20] > 1645 or data[highestj+j-20][highesti+i-20] < 1625:
+                    continue
                 #pixels[i,j] = (sinRGB(int(data_list[j+3][i]), threshold, highest), cosRGB(int(data_list[j+3][i]), threshold, highest), tanRGB(int(data_list[j+3][i]), threshold, highest))
                 #pixels[i, j] = (cosRGB(int(data_list[j + 3][i]), threshold, highest), cosRGB1(int(data_list[j + 3][i]), threshold, highest),cosRGB2(int(data_list[j + 3][i]), threshold, highest))
                 #pixels[j, i] = (rgb(threshold,highest,data[j][i]))
-                pixels[i,j] = (red(threshold,highest,data[j+56][i-10+highesti]),green(threshold,highest,data[j+56][i-10+highesti]),blue(threshold,highest,data[j+56][i-10+highesti]))
+                pixels[i, j] = (255,255,255)
+                #pixels[i,j] = (red(threshold,highest,data[highestj+j-20][highesti+i-20]),green(threshold,highest,data[highestj+j-20][highesti+i-20]),blue(threshold,highest,data[highestj+j-20][highesti+i-20]))
+                data1[i][j] = data[highestj+j-20][highesti+i-20]
                 #print(data[i][j],red(threshold,highest,data[i][j]),green(threshold,highest,data[i][j]),blue(threshold,highest,data[i][j]))
                 ##print(data[i][j],relativePos(threshold, highest, data[i][j]),red(threshold,highest,data[i][j]),green(threshold,highest,data[i][j]),blue(threshold,highest,data[i][j]))
         #pixels[10, 30] = (255,0,0)
         #drawGrad(x,y,highest,threshold,pixels)
-        img.show()
+        narr = filtering(data1)
+        img1 = Image.new('RGB', (38, 38), "white")  # create a new black image
+        pixels1 = img1.load()  #
+        for i in range(38):
+            for j in range(38):
+                #print(i,j)
+                #print(data[j][i])
+                if narr[j][i] < threshold:
+                    continue
+                #pixels[i,j] = (sinRGB(int(data_list[j+3][i]), threshold, highest), cosRGB(int(data_list[j+3][i]), threshold, highest), tanRGB(int(data_list[j+3][i]), threshold, highest))
+                #pixels[i, j] = (cosRGB(int(data_list[j + 3][i]), threshold, highest), cosRGB1(int(data_list[j + 3][i]), threshold, highest),cosRGB2(int(data_list[j + 3][i]), threshold, highest))
+                #pixels[j, i] = (rgb(threshold,highest,data[j][i]))
+                pixels1[i,j] = (red(threshold,highest,narr[j][i]),green(threshold,highest,narr[j][i]),blue(threshold,highest,narr[j][i]))
+        img.save('out121.png')
 """
 def cosRGB(i,t,h):
     return int(globalG / 2) + int(globalG / 2 * math.cos(b(h,t) * (i - t)))

@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import random
+import os
 import glob
 import csv
 data = [1,0,1,0]
@@ -18,9 +19,8 @@ def mult(x,y):
 
 
 def main():
-    patho = glob.glob('/Users/joshchung/Desktop/nparrays/*.npy')
-    print(patho)
-
+    a = np.load('/Users/joshchung/Desktop/np4040/np90badSampled_t1p524_x0_y19p36_z0_layer1.npy')
+    print(a)
 
 def dataInput():
     with open("/Users/joshchung/Desktop/testCases/90bad10.csv", newline='') as csvfile:

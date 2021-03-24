@@ -79,7 +79,12 @@ class NeuralNetwork:
                 self.weights3[i][j] = float(data_list[i + self.inputSize + self.hiddenSize1][j])
 
     def filtering(self, dir):
-        arr = np.load(dir)
+        if(dir.find(".csv")!=-1):
+            with open(dir, newline='') as csvfile:
+                data_list = list(csv.reader(csvfile))
+                arr = np.array(data_list).astype(np.float)
+        else:
+            arr = np.load(dir)
         newArr = np.zeros((len(arr) - 2, len(arr) - 2))
         for i in range(1, len(arr) - 1):
             for j in range(1, len(arr) - 1):
@@ -99,7 +104,12 @@ class NeuralNetwork:
         return a
 
     def filteringPooled(self, dir):
-        arr = np.load(dir)
+        if (dir.find(".csv") != -1):
+            with open(dir, newline='') as csvfile:
+                data_list = list(csv.reader(csvfile))
+                arr = np.array(data_list).astype(np.float)
+        else:
+            arr = np.load(dir)
         newArr = np.zeros((len(arr) - 2, len(arr) - 2))
         for i in range(1, len(arr) - 1):
             for j in range(1, len(arr) - 1):
@@ -148,6 +158,31 @@ class NeuralNetwork:
             return np.array([1])
         else:
             return np.array([0])
+    def initCross(self):
+        path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/CrossValidationData.csv"
+        with open(path, 'a', newline='') as file:
+            writer = csv.writer(file)
+            prevCount = int(self.weightFile[self.weightFile.find("weights") + 7: self.weightFile.find(".csv")])
+            for groupSkip in range(1, 11):
+                check = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupSkip) + "/*.csv")
+                badcount = 0
+                badcountcorrect = 0
+                goodcount = 0
+                goodcountcorrect = 0
+                for item in check:
+                    if (item.find("bad") != -1):
+                        if (self.test(self.filteringPooled(item)) > .5):
+                            badcountcorrect += 1
+                        badcount += 1
+                    else:
+                        if (self.test(self.filteringPooled(item)) < .5):
+                            goodcountcorrect += 1
+                        goodcount += 1
+                thisRow = [str(prevCount + self.count), "Test group:" + str(groupSkip), "Total correct:",
+                           str((badcountcorrect + goodcountcorrect) / (badcount + goodcount)), "Bad correct:",
+                           str(badcountcorrect) + "/" + str(badcount), "Good correct:",
+                           str(goodcountcorrect) + "/" + str(goodcount)]
+                writer.writerow(thisRow)
 
     def crossVal(self):
         path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/CrossValidationData.csv"
@@ -162,7 +197,7 @@ class NeuralNetwork:
                     while (len(fname) != 0):
                         index = random.randint(0,len(fname))
                         dir = fname[index]
-                        self.train(self.filtering(dir),self.dataOutput(dir))
+                        self.train(self.filteringPooled(dir),self.dataOutput(dir))
                         fname.pop(index)
                 check = glob.glob("/Users/joshchung/Desktop/cross/g" + str(groupSkip) + "/*.csv")
                 badcount = 0
@@ -171,11 +206,11 @@ class NeuralNetwork:
                 goodcountcorrect = 0
                 for item in check:
                     if (item.find("bad")!=-1):
-                        if (self.test(self.filtering(item)) > .7):
+                        if (self.test(self.filteringPooled(item)) > .5):
                             badcountcorrect += 1
                         badcount += 1
                     else:
-                        if (self.test(self.filtering(item)) < .2):
+                        if (self.test(self.filteringPooled(item)) < .5):
                             goodcountcorrect += 1
                         goodcount += 1
                 """
@@ -188,7 +223,7 @@ class NeuralNetwork:
                 writer.writerow(thisRow)
 
     def testCases4040(self,which):
-        fname = glob.glob("/Users/joshchung/Desktop/np4040/*.npy")
+        fname = glob.glob("/Users/joshchung/Desktop/testCasesFinal/*.npy")
         g = 0
         b = 0
         gc = 0
@@ -224,38 +259,48 @@ class NeuralNetwork:
         #print(np.array([arr.flatten()]))
         return np.array([arr.flatten()])
 
+    def testCases4040Cross(self):
+        fname = glob.glob("/Users/joshchung/Desktop/4040testcases/*.csv")
+        g = 0
+        b = 0
+        gc = 0
+        bc = 0
+        for item in fname:
+            guess = self.test(self.filtering(item))
+
+            if (item.find("bad") != -1):
+                b += 1
+                if (guess > .50):
+                    bc += 1
+                else:
+                    print(item[39:], guess)
+            else:
+                g += 1
+                if (guess < .50):
+                    gc += 1
+                else:
+                    print(item[39:], guess)
+
+        print("Bad" + str(bc) + "/" + str(b))
+        print("good" + str(gc) + "/" + str(g))
+
 def main():
     print("here")
     path = "/Users/joshchung/PycharmProjects/ArestyResearchGit/Aresty/data/"
-    nn = NeuralNetwork(361, 1, 75, 25, .1, False, path + 'filteringpooledweights212400.csv')
-    nnFiltered = NeuralNetwork(1444, 1, 75, 25, .1, False, path + 'filteringweights442500.csv')
+    nnPooled = NeuralNetwork(361, 1, 75, 25, .05, False, path + 'filteringpooledFinalweights0.csv')
+    nnPooled.initCross()
+    nnFiltered = NeuralNetwork(1444, 1, 75, 15, .01, False, path + 'filteringFinalweights760500.csv')
     nnNormal = NeuralNetwork(1600, 1, 75, 16, .01, False, path + '4040randomweights177000.csv')
-    np.set_printoptions(threshold=sys.maxsize)
-    a = nnFiltered.weights1
-    b = nnFiltered.weights2
-    c = nnFiltered.weights3
-    d = np.array([a,b,c])
-    np.save('combined.npy', d)
-    for i in range(0):
+    for i in range(20):
         print(i)
-        if(i==300):
-            nnNormal.lr = .005
-            nnNormal.testCases4040("normal")
-        if(i==450):
-            nnNormal.lr = .0001
-            nnNormal.testCases4040("normal")
-        tempPaths = glob.glob('/Users/joshchung/Desktop/np4040/*.npy')
-        np.random.shuffle(tempPaths)
-        for j in tempPaths:
-            nnNormal.train(nnNormal.standard(np.load(j)),nnNormal.dataOutput(j))
-        #nn.testCases4040("dspooled")
+        nnPooled.crossVal()
     print("\npooled")
-    nn.testCases4040("pooled")
+    nnPooled.testCases4040("pooled")
     print("\nfilter only")
     nnFiltered.testCases4040("filter")
     print("\nnormal")
     nnNormal.testCases4040("normal")
-
+    nnPooled.save()
 
 """def filtering(arr):
     newArr = np.zeros((len(arr)-2,len(arr)-2))
