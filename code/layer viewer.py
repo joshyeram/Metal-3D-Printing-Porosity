@@ -36,7 +36,7 @@ def main():
                     highestj = j
                     highesti = i
         mean /= y * x
-        threshold = int(topPercent(data_list, .01, x, y))
+        threshold = int(topPercent(data, .99, x, y))
 
         print(threshold)
         print(mean)
@@ -181,12 +181,8 @@ def b(high, threshold):
     return v
 
 def topPercent(l, percent, x, y):
-    b = []
-    for i in range(len(l)):
-        for j in range(len(l[i])):
-            b.append(l[i][j])
-    b.sort(reverse=True)
-
+    b = l.flatten()
+    b.sort()
     return int(b[int(percent * x * y)])
 
 def drawGrad(x,y,h,t,p):
