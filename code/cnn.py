@@ -77,6 +77,19 @@ class NeuralNetwork:
         for i in range(self.hiddenSize2):
             for j in range(self.outputSize):
                 self.weights3[i][j] = float(data_list[i + self.inputSize + self.hiddenSize1][j])
+    def outline(self, dir):
+        if(dir.find(".csv")!=-1):
+            with open(dir, newline='') as csvfile:
+                data_list = list(csv.reader(csvfile))
+                arr = np.array(data_list).astype(np.float)
+        else:
+            arr = np.load(dir)
+        newArr = np.zeros((40,40))
+        for i in range(40):
+            for j in range(40):
+               if(arr[i][j]>=1635 and arr[i][j]<=1645):
+                   newArr[i][j] = 1
+        return np.array([newArr.flatten()])
 
     def filtering(self, dir):
         if(dir.find(".csv")!=-1):
@@ -290,17 +303,26 @@ def main():
     nnPooled = NeuralNetwork(361, 1, 75, 25, .05, False, path + 'filteringpooledFinalweights0.csv')
     nnPooled.initCross()
     nnFiltered = NeuralNetwork(1444, 1, 75, 15, .01, False, path + 'filteringFinalweights760500.csv')
+
     nnNormal = NeuralNetwork(1600, 1, 75, 16, .01, False, path + '4040randomweights177000.csv')
-    for i in range(20):
+    a = nnFiltered.weights1;
+    b = nnFiltered.weights2;
+    c = nnFiltered.weights3;
+    d = np.array([a,b,c])
+    np.save("../app/finalWeights.npy", d)
+    print(a)
+    for i in range(0):
         print(i)
-        nnPooled.crossVal()
-    print("\npooled")
-    nnPooled.testCases4040("pooled")
+        if(i == 30):
+            nnNormal.lr = .01
+        if(i==100):
+            nnNormal.lr = .001
+        nnNormal.crossVal()
+
     print("\nfilter only")
     nnFiltered.testCases4040("filter")
-    print("\nnormal")
-    nnNormal.testCases4040("normal")
-    nnPooled.save()
+
+
 
 """def filtering(arr):
     newArr = np.zeros((len(arr)-2,len(arr)-2))

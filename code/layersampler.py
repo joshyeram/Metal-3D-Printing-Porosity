@@ -15,7 +15,7 @@ def main():
     fname = "/Users/joshchung/Desktop/converted/t306p7_x0_y29p04_z19p89_layer40.csv"
     paths1 = glob.glob("/Users/joshchung/Desktop/converted/*.csv")
     for i in paths1:
-        with open(fname, newline='') as csvfile:
+        with open(i, newline='') as csvfile:
             data_list = list(csv.reader(csvfile))
             x = int(data_list[0][1])
             y = int(data_list[1][1])
@@ -35,7 +35,6 @@ def main():
                 for j in range(cols):  # For every row
                     final[i][j] = convert[i +indexY][j + indexX]
             np.save('testingMap.npy',final)
-        break
             #print(final)
     """
             name = fname[fname.find("/IR")+4:]

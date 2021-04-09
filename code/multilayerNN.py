@@ -166,7 +166,6 @@ class NeuralNetwork:
         tn = 0
         collected = 0
         currArray = []
-
         while(len(inputDir)!=0):
             index = random.randint(0, len(inputDir))
             dir = inputDir[index]

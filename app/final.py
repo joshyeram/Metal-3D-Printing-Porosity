@@ -1,13 +1,13 @@
 import csv
 import numpy as np
 import os.path
-
+import os
 """
 @author: Joshua Chung (jyc70)
 Project: Rutgers Aresty Research Assistant 2020 - 2021
 
 cnn layout: 
-input: 40x40 matrix input -> filter (sharpen filter 5-1-1-1-1) -> Input transformed (38 x 38) -> flatten -(weight1) layer1 -(weight2)> layer 2 -(weight3)> output 
+input: 40x40 matrix input -> filter (sharpeness filter 5-1-1-1-1) -> Input transformed (38 x 38) -> flatten -(weight1)> hidden layer1 -(weight2)> hidden layer 2 -(weight3)> output 
 """
 
 def filtering(arr):
@@ -52,17 +52,17 @@ def test(dir,state):
     if os.path.isfile(dir) == False:
         print("No such file found")
         return False
-    if os.path.isfile('combined.npy'):
-        wArr = np.load('combined.npy', allow_pickle=True)
+    if os.path.isfile('finalWeights.npy'):
+        wArr = np.load('finalWeights.npy', allow_pickle=True)
         weight1 = wArr[0]
         weight2 = wArr[1]
         weight3 = wArr[2]
-    elif os.path.isfile('combined.csv'):
+    elif os.path.isfile('finalWeights.csv'):
         inputSize = 1444
         hiddenSize1 = 75
         hiddenSize2 = 25
         outputSize = 1
-        with open('combined.csv', newline='') as csvfile:
+        with open('finalWeights.csv', newline='') as csvfile:
             data_list = list(csv.reader(csvfile))
         weight1 = np.zeros((inputSize, hiddenSize1))
         weight2 = np.zeros((hiddenSize1, hiddenSize2))
@@ -77,7 +77,7 @@ def test(dir,state):
             for j in range(outputSize):
                 weight3[i][j] = float(data_list[i + inputSize + hiddenSize1][j])
         temp = np.array([weight1, weight2, weight3])
-        np.save('combined.npy', temp)
+        np.save('finalWeights.npy', temp)
     else:
         print("No correct weight file found!")
         return False
