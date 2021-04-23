@@ -305,11 +305,7 @@ def main():
     nnFiltered = NeuralNetwork(1444, 1, 75, 15, .01, False, path + 'filteringFinalweights760500.csv')
 
     nnNormal = NeuralNetwork(1600, 1, 75, 16, .01, False, path + '4040randomweights177000.csv')
-    a = nnFiltered.weights1;
-    b = nnFiltered.weights2;
-    c = nnFiltered.weights3;
-    d = np.array([a,b,c])
-    np.save("../app/finalWeights.npy", d)
+
     print(a)
     for i in range(0):
         print(i)
