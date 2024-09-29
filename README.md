@@ -3,9 +3,5 @@
 <p align="center">
   <img src="https://github.com/joshyeram/Aresty/blob/master/visual/Combined.jpg", width="1000"/>
 </p>
-For my Aresty research, I am developing a neural network that can detect porosity given a melt pool temperature map for better manufacturing processes and better part additive manufactured production. 
+For my Aresty research, I have designed and trained a convoluted neural network that achieved an accuracy of 95.6% in identifying potential porosity and irregular density given a 40 x 40 melt pool temperature map. Under Professor Guo, I analyzed over 70 million metal laser 3D printing temperature maps to augment new datasets that accentuate melt pool features.
 
-<p align="center">
-  <img src="https://github.com/joshyeram/Aresty/blob/master/visual/outline.jpg", width="1000"/>
-</p>
-I will incorporate a neural network into a system of detection algorithms to detect such porosities and other printing irregularities.
